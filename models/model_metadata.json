@@ -1,0 +1,12 @@
+{
+    "target_definition": "1 = readmitted < 30 days; 0 = no readmit or readmitted >= 30 days",
+    "clinical_exclusions": "discharge_disposition_id in [11, 19, 20, 21] (expired/in-hospital death)",
+    "split_strategy": "GroupShuffleSplit on patient_nbr (70% Train, 15% Val, 15% Test)",
+    "input_dimension": 206,
+    "best_traditional_model": "LightGBM (Cost-Sensitive)",
+    "best_traditional_val_roc_auc": 0.6813,
+    "best_traditional_test_roc_auc": 0.6566,
+    "best_deep_learning_model": "Cost-Sensitive Deep MLP",
+    "best_deep_learning_val_roc_auc": 0.6842,
+    "best_deep_learning_test_roc_auc": 0.6574
+}
