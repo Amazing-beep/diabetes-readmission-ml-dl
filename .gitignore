@@ -26,10 +26,16 @@ data/
 raw_data/
 
 # Model binaries and large artifacts (Stored in designated Google Drive folder)
-models/*.joblib
-models/*.keras
-models/*.h5
-models/*.pkl
+*.joblib
+*.keras
+*.h5
+*.pkl
+**/models/*.joblib
+**/models/*.keras
+**/models/*.h5
+**/models/*.pkl
+notebooks/models/
+**/data/
 
 # OS-specific
 .DS_Store
