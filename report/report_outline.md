@@ -180,6 +180,32 @@ Selected based strictly on validation ROC-AUC / PR-AUC and evaluated on the unto
 
 ---
 
+### VII. References (IEEE Format)
+
+[1] B. Strack, J. P. DeShazo, C. Gennings, J. L. Olmo, S. Ventura, K. J. Cios, and J. N. Clore, "Impact of HbA1c measurement on hospital readmission rates: analysis of 70,000 clinical database records," *BioMed Res. Int.*, vol. 2014, Art. no. 781670, 2014. DOI: 10.1155/2014/781670.
+
+[2] D. Kansagara, H. Englander, A. Salanitro, D. Kagen, C. Theobald, M. Freeman, and S. Saha, "Risk prediction models for hospital readmission: a systematic review," *JAMA*, vol. 306, no. 15, pp. 1688–1698, Oct. 2011. DOI: 10.1001/jama.2011.1515.
+
+[3] B. Shickel, P. J. Tighe, A. Bihorac, and P. Rashidi, "Deep EHR: a survey of recent advances in deep learning techniques for electronic health record (EHR) analysis," *IEEE J. Biomed. Health Inform.*, vol. 22, no. 5, pp. 1589–1604, Sept. 2018. DOI: 10.1109/JBHI.2017.2767063.
+
+[4] A. Rajkomar *et al.*, "Scalable and accurate deep learning for electronic health records," *npj Digit. Med.*, vol. 1, no. 1, Art. no. 18, May 2018. DOI: 10.1038/s41746-018-0029-1.
+
+[5] T. Saito and M. Rehmsmeier, "The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets," *PLOS ONE*, vol. 10, no. 3, Art. no. e0118432, Mar. 2015. DOI: 10.1371/journal.pone.0118432.
+
+[6] G. Ke, Q. Meng, T. Finley, T. Wang, W. Chen, W. Ma, Q. Ye, and T.-Y. Liu, "LightGBM: A highly efficient gradient boosting decision tree," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, vol. 30, pp. 3146–3154, Dec. 2017.
+
+[7] S. Kaufman, S. Rosset, C. Perlich, and O. Stitelman, "Leakage in data mining: Formulation, detection, and avoidance," *ACM Trans. Knowl. Discov. Data*, vol. 6, no. 4, Art. no. 15, pp. 1–21, Dec. 2012. DOI: 10.1145/2382577.2382579.
+
+[8] D. J. Rubin, "Hospital readmission of patients with diabetes," *Curr. Diab. Rep.*, vol. 15, no. 4, Art. no. 17, Apr. 2015. DOI: 10.1007/s11892-015-0584-7.
+
+[9] H. He and E. A. Garcia, "Learning from imbalanced data," *IEEE Trans. Knowl. Data Eng.*, vol. 21, no. 9, pp. 1263–1284, Sept. 2009. DOI: 10.1109/TKDE.2008.239.
+
+[10] S. M. Lundberg and S.-I. Lee, "A unified approach to interpreting model predictions," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, vol. 30, pp. 4765–4774, Dec. 2017.
+
+[11] L. Grinsztajn, E. Oyallon, and G. Varoquaux, "Why do tree-based models still outperform deep learning on typical tabular data?," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, vol. 35, pp. 507–520, Dec. 2022.
+
+---
+
 ## 5–10 Minute Oral Presentation Script & Slide Outline
 
 | Slide # | Slide Title | Recommended Timing | Speaking Points & Visual Cues | Anticipated Technical Defense Questions |
