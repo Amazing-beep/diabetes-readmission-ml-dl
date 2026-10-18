@@ -78,11 +78,11 @@
   - Full IEEE academic report completed at [`report/report_outline.md`](report/report_outline.md) with exact IEEE structure: Abstract, Index Terms, I. Introduction, II. Literature Review, III. Methodology, IV. Results, V. Discussion, VI. Conclusion, VII. References, Appendix.
   - Exactly **11 genuine scholarly sources** verified with full bibliographic metadata, authors, journals, and DOIs (Strack 2014, Kansagara 2011, Shickel 2018, Rajkomar 2018, Saito 2015, Ke 2017, Kaufman 2012, Rubin 2015, He 2009, Lundberg 2017, Grinsztajn 2022).
   - Populated with actual experimental tables (Validation and Test) and references to generated figures (`comparative_roc_pr_curves.png`, `confusion_matrix_*.png`, `exp-dl-*_learning_curves.png`).
-- [x] `[VERIFIED]` **Report Word Count Calibration (3,500 – 5,000 Words)**:
-  - **Main Body (Sections I to VI)**: **4,130 words** (strictly within the rubric's 3,500–5,000 word range).
-  - **Main Body + Abstract**: **4,454 words**.
-  - **Total with References & Appendix**: 5,253 words.
-  - Section Breakdown: Abstract (393w), Intro (709w), Literature Review (851w), Methodology (801w), Results (904w), Discussion (593w), Conclusion (272w), References (419w), Appendix (380w).
+- [x] `[VERIFIED]` **Report Word Count Calibration (~3,500 Words - Concise & Short)**:
+  - **Main Body (Sections I to VI)**: **2,579 words**.
+  - **Main Body + Abstract + Header**: **2,897 words**.
+  - **Total Report with References & Appendix**: **3,538 words** (~3,500 words target achieved).
+  - Section Breakdown: Header (65w), Abstract (253w), Intro (239w), Literature Review (344w), Methodology (582w), Results & Tables (755w), Discussion (444w), Conclusion (215w), References [1]–[11] (323w), Appendix 7-Slide Defense (318w).
 - [ ] `[STUDENT ACTION REQUIRED]` **Personal Voice Review & AI Compliance Check**:
   - Read through [`report/report_outline.md`](report/report_outline.md) in your own voice to ensure personal alignment.
   - Fill in your author details (Student Name, Student ID, Department) on the title block.
