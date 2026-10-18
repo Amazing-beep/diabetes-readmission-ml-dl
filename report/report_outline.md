@@ -4,7 +4,7 @@
 **Target Venue**: University Summative Project Report (IEEE Format)  
 **Repository**: [https://github.com/Amazing-beep/diabetes-readmission-ml-dl](https://github.com/Amazing-beep/diabetes-readmission-ml-dl)  
 **Deliverables**: [Google Drive Folder](https://drive.google.com/drive/folders/1LoVTMlsopfQ8C3oAqFJ3xGavl8eiNfFD?usp=drive_link)  
-**Presentation Video**: *(Insert recorded 5–10 minute presentation URL here)*  
+**Presentation Video**: *https://youtu.be/vJBLKcI8V2Q?si=3iOISiRe8vF2Nc4M*  
 
 ---
 ## Abstract
