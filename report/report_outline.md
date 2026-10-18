@@ -1,7 +1,7 @@
 # Comparative Evaluation of Classical Machine Learning and Deep Learning Architectures for Retrospective 30-Day Hospital Readmission Prediction in Diabetic Inpatients
 
 **Author**: Software Engineering Student  
-**Target Venue / Style**: University Summative Project Report (IEEE Transactions / Conference Format)  
+**Target Venue / Style**: University Summative Project Report (IEEE Format)  
 **Submission Repository**: [https://github.com/Amazing-beep/diabetes-readmission-ml-dl](https://github.com/Amazing-beep/diabetes-readmission-ml-dl)  
 **Designated Google Drive Folder**: [https://drive.google.com/drive/folders/1LoVTMlsopfQ8C3oAqFJ3xGavl8eiNfFD?usp=drive_link](https://drive.google.com/drive/folders/1LoVTMlsopfQ8C3oAqFJ3xGavl8eiNfFD?usp=drive_link)  
 **Presentation Video Link**: *(Insert recorded 5–10 minute presentation URL here)*  
@@ -10,74 +10,55 @@
 
 ## Abstract
 
-Hospital readmission within 30 days of discharge is a critical clinical quality indicator and financial liability under the Centers for Medicare & Medicaid Services (CMS) Hospital Readmissions Reduction Program (HRRP). Inpatients with diabetes mellitus experience elevated readmission risks due to glycemic volatility, discharge medication transitions, and multimorbid complications. This study presents a comparative evaluation of classical machine learning algorithms and deep neural networks for predicting 30-day all-cause hospital readmission using the landmark UCI Diabetes 130-US Hospitals dataset (1999–2008). To eliminate entity data leakage across multiple hospitalizations, we enforce strict patient-grouped partitioning (`GroupShuffleSplit` on 70,439 unique patients across 100,114 non-expired encounters), guaranteeing zero patient overlap across training (70%), validation (15%), and test (15%) splits. We evaluate ten systematically varied models: six classical approaches (Dummy baseline, unweighted/balanced Logistic Regression, Random Forest, HistGradientBoosting, and Cost-Sensitive LightGBM) and four deep neural networks in TensorFlow/Keras utilizing streaming `tf.data` pipelines (Sequential Baseline MLP, Functional Regularized MLP, Wide MLP, and Cost-Sensitive Deep MLP). Under severe class imbalance (~11.3% positive readmission prevalence), unweighted empirical risk minimization suffers from majority-class collapse, obtaining high accuracy (>88%) but negligible recall (<2.5%). Applying cost-sensitive loss weighting ($w = 7.8$) significantly shifts model behavior, elevating clinical sensitivity beyond 54%. On the untouched test cohort ($N = 15,000$ encounters, $10,566$ independent patients), Cost-Sensitive LightGBM achieved a test ROC-AUC of 0.6566, PR-AUC of 0.2040, and 54.17% recall (specificity 68.47%). Cost-Sensitive Deep MLP achieved a test ROC-AUC of 0.6574, PR-AUC of 0.2108, and 52.92% recall (specificity 69.21%). Our empirical findings demonstrate that gradient boosted decision trees match deep architectures on tabular electronic health records (EHR) while training over 57 times faster (0.84 s vs. 48.24 s) and providing superior operational interpretability.
+Hospital readmission within 30 days of discharge is a critical quality indicator and financial liability under the CMS Hospital Readmissions Reduction Program (HRRP). Diabetic inpatients experience elevated readmission risks due to glycemic volatility, discharge medication transitions, and multimorbid complications. This study presents a comparative evaluation of classical machine learning algorithms and deep neural networks for predicting 30-day all-cause readmissions using the landmark UCI Diabetes 130-US Hospitals dataset (1999–2008). To eliminate entity data leakage across multiple hospitalizations, we enforce strict patient-grouped partitioning (`GroupShuffleSplit` on 70,439 unique patients across 100,114 non-expired encounters), guaranteeing zero patient overlap across training (70%), validation (15%), and test (15%) splits. We evaluate ten systematically varied models: six classical algorithms (Dummy baseline, unweighted/balanced Logistic Regression, Random Forest, HistGradientBoosting, Cost-Sensitive LightGBM) and four deep neural networks in TensorFlow/Keras using streaming `tf.data` pipelines (Sequential Baseline MLP, Functional Regularized MLP, Wide MLP, Cost-Sensitive Deep MLP). Under severe class imbalance (~11.3% readmission prevalence), unweighted models suffer from majority-class collapse, obtaining >88% accuracy but negligible recall (<2.5%). Applying cost-sensitive loss weighting ($w = 7.8$) elevates clinical sensitivity beyond 54%. On the untouched test cohort ($N = 15,000$ encounters, $10,566$ independent patients), Cost-Sensitive LightGBM achieved a test ROC-AUC of 0.6566, PR-AUC of 0.2040, and 54.17% recall (specificity 68.47%). Cost-Sensitive Deep MLP achieved a test ROC-AUC of 0.6574, PR-AUC of 0.2108, and 52.92% recall (specificity 69.21%). Gradient boosted decision trees match deep architectures on tabular electronic health records (EHR) while training over 57 times faster (0.84 s vs. 48.24 s) with superior operational interpretability.
 
-**Index Terms**—30-day hospital readmission, diabetes mellitus, clinical risk stratification, gradient boosted decision trees, LightGBM, deep neural networks, TensorFlow, tf.data, class imbalance, cost-sensitive learning, data leakage, patient-grouped splitting, electronic health records.
+**Index Terms**—30-day readmission, diabetes, clinical risk stratification, LightGBM, deep learning, tf.data, class imbalance, cost-sensitive learning, data leakage, patient-grouped splitting, EHR.
 
 ---
 
 ## I. Introduction
 
-### A. Clinical Background & Healthcare Burden
-Diabetes mellitus affects over 37 million individuals in the United States, driving annual healthcare expenditures exceeding $300 billion. The clinical management of diabetes during acute hospitalization is exceptionally challenging. Inpatients are frequently admitted for acute metabolic decompensation—such as diabetic ketoacidosis (DKA) or hyperosmolar hyperglycemic state (HHS)—or for severe comorbid vascular events, including myocardial infarction, congestive heart failure, stroke, and chronic kidney disease. Following discharge, patients enter a precarious transition. Shifts from monitored inpatient regimens to self-care, compounded by discharge medication errors, uncoordinated specialty follow-ups, and cognitive fatigue, create substantial risk of rapid deterioration.
+### A. Clinical Context & Healthcare Policy
+Diabetes mellitus affects over 37 million Americans, generating annual healthcare expenditures exceeding $300 billion. Hospitalized diabetic inpatients frequently present with acute glycemic emergencies (diabetic ketoacidosis, hyperosmolar hyperglycemic state) or severe vascular complications (coronary artery disease, heart failure, stroke, chronic kidney disease). Following discharge, transitioning to unmonitored outpatient self-care creates high vulnerability to rapid decompensation, resulting in 30-day readmission rates consistently between 15% and 25%.
 
-Consequently, 30-day all-cause hospital readmission rates for diabetic cohorts consistently range between 15% and 25%. Post-discharge readmissions reflect multifaceted interactions among microvascular damage, autonomic neuropathy, and social barriers. When acute glycemic volatility escalates within the initial post-discharge month, emergency rehospitalization frequently ensues, exposing patients to hospital-acquired complications and functional decline.
+Under Section 3025 of the Affordable Care Act, the Centers for Medicare & Medicaid Services (CMS) established the Hospital Readmissions Reduction Program (HRRP), penalizing acute care hospitals up to 3% of aggregate Medicare inpatient reimbursements for excess 30-day readmissions. Because diabetes is present in over 30% of hospitalized Medicare beneficiaries, predicting readmission risk at discharge is vital for patient safety and hospital solvency. Identifying high-risk individuals enables case managers to prioritize transitional care interventions (nurse phone outreach, medication reconciliation, and scheduled 7-day primary care follow-up).
 
-### B. Health Policy & Financial Imperatives (CMS HRRP)
-Beyond patient morbidity, 30-day readmissions represent a central focus of healthcare policy. Under Section 3025 of the Patient Protection and Affordable Care Act (ACA), the United States Congress established the Hospital Readmissions Reduction Program (HRRP), administered by the Centers for Medicare & Medicaid Services (CMS). The HRRP structurally transitioned inpatient financing from fee-for-service toward value-based purchasing by penalizing hospitals exhibiting excess 30-day readmission ratios.
+### B. Problem Formulation & Operational Scope
+Developing automated readmission risk models from retrospective Electronic Health Records (EHR) involves four computational challenges:
+1. **Outcome Imbalance**: With ~11% readmission prevalence, standard algorithms minimizing 0-1 error collapse into predicting negative for all patients, yielding zero clinical utility.
+2. **Entity Data Leakage**: Chronic diabetic patients frequently experience repeated admissions (16,773 patients appear multiple times, up to 40 times). Random row splitting distributes encounters from the same patient across train and test sets, causing models to memorize patient identities rather than clinical risk patterns.
+3. **Tabular Sparsity**: Retrospective EHR data combines continuous measurements, discrete administrative fields, and high-cardinality ICD-9-CM diagnostic codes with irregular missingness.
+4. **Operational Latency**: Production pipelines must execute sub-second inference on standard hardware and provide interpretable feature attributions for clinical trust.
 
-Under statutory rules, acute care hospitals face financial penalties of up to 3% across aggregate Medicare inpatient reimbursements if risk-adjusted readmissions exceed expected national thresholds. Because diabetes is a primary or secondary comorbidity in over 30% of hospitalized Medicare beneficiaries, managing diabetic readmission risk is vital for institutional viability. This policy landscape has accelerated demand for automated risk prediction engines. A reliable predictive model deployed at discharge enables case managers to allocate intensive transitional care—such as nurse telephone outreach, pharmacist medication reconciliation, and scheduled 7-day primary care follow-up—to the highest-risk patients.
+> **Operational Boundary Declaration**: This pipeline functions strictly as an *operational risk stratification tool* to assist inpatient discharge planning. It **does not diagnose diabetes**, does not assess disease onset, does not modify pharmacotherapy, and does not establish causal clinical mechanisms.
 
-### C. Machine Learning Problem Definition & Software Engineering Challenges
-Developing an automated clinical risk stratification engine from retrospective Electronic Health Record (EHR) data presents four primary computational challenges:
-1. **Severe Outcome Imbalance**: In unselected inpatient populations, 30-day readmissions represent a distinct minority event (~11% prevalence). Standard algorithms minimizing 0-1 misclassification error converge toward trivial negative-class prediction. In clinical practice, such models are useless because clinical recall is zero.
-2. **Patient Multiplicity and Entity Data Leakage**: Chronic diabetes patients frequently experience repeated hospitalizations. In the cohort examined herein, 16,773 patients appear multiple times, accounting for over 46% of records. Unconstrained random row splitting causes encounters from the same patient to populate both training and test partitions, inducing entity leakage where models memorize patient biometric signatures rather than generalizable clinical patterns.
-3. **High-Dimensional Heterogeneous Predictors**: Retrospective EHR data combines continuous physiological measurements, discrete administrative fields, and high-cardinality diagnostic codes (hundreds of distinct ICD-9-CM categories) with substantial missingness and irregular scales.
-4. **Computational Latency & Governance**: Clinical deployment requires pipelines that integrate into enterprise EHR systems (e.g., Epic, Cerner) via HL7 FHIR standards. Algorithms must execute sub-second inference on standard hardware and provide interpretable feature attributions to satisfy clinical review.
-
-### D. Operational Boundary Declaration
-To ensure clinical and ethical validity, we establish the explicit operational boundary of this investigation:
-> **Operational Scope**: This system functions strictly as an *operational risk stratification tool* designed to assist inpatient care coordinators in prioritizing supportive transitional care interventions at discharge.
-> 
-> **Explicit Non-Scope**: This system **does not diagnose diabetes mellitus**, does not assess disease onset or diagnostic etiology, does not recommend insulin titrations or pharmacotherapy alterations, and does not claim causal clinical mechanisms. It is purely a predictive triage model operating on retrospective administrative and clinical encounter attributes.
-
-### E. Research Objectives
-This study addresses three formal research questions:
-- **RQ1 (Tabular Inductive Bias)**: Can deep neural network architectures using TensorFlow/Keras and streaming `tf.data` pipelines outperform tuned gradient boosted decision trees (LightGBM) on tabular EHR data characterized by high categorical sparsity and class imbalance?
-- **RQ2 (Generalization via Patient Grouping)**: Does enforcing strict patient-grouped partitioning (`GroupShuffleSplit`) eliminate patient identity memorization, and how do the resulting unbiased performance estimates align with clinical benchmarks?
-- **RQ3 (Cost-Sensitive Optimization)**: How do unweighted empirical risk minimization and cost-sensitive loss weighting ($w = 7.8$) trade off global classification accuracy against clinical recall, precision, and the area under the precision-recall curve (PR-AUC)?
+### C. Research Objectives
+- **RQ1 (Tabular Inductive Bias)**: Can deep neural networks using TensorFlow/Keras and streaming `tf.data` pipelines outperform tuned gradient boosted decision trees (LightGBM) on tabular EHR data?
+- **RQ2 (Leakage-Free Generalization)**: Does enforcing strict patient-grouped partitioning (`GroupShuffleSplit`) eliminate patient memorization and provide unbiased performance estimates?
+- **RQ3 (Cost-Sensitive Optimization)**: How do unweighted empirical risk minimization and cost-sensitive loss weighting ($w = 7.8$) trade off classification accuracy against clinical recall, precision, and PR-AUC?
 
 ---
 
 ## II. Literature Review & Theoretical Grounding
 
-### A. Clinical Risk Scoring Systems & Readmission Benchmarks
-Predicting hospital readmissions has been an active area of health services research for decades. Early efforts centered on manual, point-based clinical scoring tools for bedside calculation, such as the LACE Index and the HOSPITAL score.
+### A. Clinical Risk Scoring & Administrative Benchmarks
+Early readmission prediction relied on manual bedside clinical scoring tools such as the LACE Index and the HOSPITAL score. In a systematic review in *JAMA*, Kansagara et al. [2] evaluated 30 readmission prediction models, showing that retrospective administrative models achieve modest discrimination, with concordance statistics (c-statistics / ROC-AUC) typically clustering between 0.60 and 0.70. Kansagara et al. concluded that administrative data faces an intrinsic predictive ceiling due to unobserved factors such as health literacy, functional status, and post-discharge social support. This literature establishes that models achieving ROC-AUC between 0.65 and 0.70 represent solid, state-of-the-art discrimination within administrative EHR constraints.
 
-In a landmark systematic review published in *JAMA*, Kansagara et al. [2] evaluated 30 distinct readmission risk prediction models across varied clinical populations. Their meta-analysis revealed that most retrospective administrative models achieved modest discrimination, with concordance statistics (c-statistics, equivalent to ROC-AUC) clustering between 0.60 and 0.70. Kansagara et al. concluded that models relying exclusively on retrospective administrative data face an intrinsic discriminative ceiling due to unobserved factors such as functional status, health literacy, psychosocial stability, and outpatient prescription adherence. This benchmark literature establishes realistic empirical expectations: models operating on retrospective tabular EHR data that achieve ROC-AUC values between 0.65 and 0.70 represent clinically robust discrimination within administrative constraints.
+### B. Landmark Dataset & Deep EHR Modeling
+The primary benchmark for diabetic readmission modeling was introduced by Strack et al. (2014) [1], analyzing 101,766 encounters across 130 US hospitals (1999–2008) to demonstrate that inpatient HbA1c testing and medication modifications correlate with reduced readmissions. However, Strack et al. evaluated only the first encounter per patient and relied exclusively on linear logistic regression. Rubin (2015) [8] reviewed clinical readmission drivers, highlighting prior acute utilization, comorbidity burden, and insulin complexity, while emphasizing that in-hospital deaths must be systematically excluded from readmission cohorts.
 
-### B. The UCI Diabetes 130-US Hospitals Landmark Dataset
-The empirical foundation for computational research into diabetic readmissions was established by Strack, DeShazo, Gennings, Olmo, Ventura, Cios, and Clore (2014) in their seminal study [1]. Strack et al. extracted a multi-center cohort comprising 101,766 inpatient encounters across 130 United States hospitals spanning 1999 to 2008. Their clinical investigation focused on assessing whether performing glycated hemoglobin (HbA1c) testing during admission correlated with reduced 30-day readmissions.
+In deep clinical modeling, Shickel et al. (2018) [3] surveyed neural network architectures applied to EHR data, highlighting multilayer perceptrons (MLPs) and recurrent networks for non-linear representation learning. Rajkomar et al. (2018) [4] demonstrated deep learning across massive multi-center EHR data (ROC-AUC 0.75–0.76). However, Rajkomar et al. utilized full temporal sequences of millions of raw clinical tokens (vitals, provider notes, orders). In cross-sectional tabular EHR data, whether deep architectures maintain advantages over tree ensembles remains an open empirical question.
 
-Using multivariable logistic regression, Strack et al. demonstrated that measuring HbA1c and modifying anti-diabetic medications significantly reduced readmission hazards. However, Strack et al. restricted their evaluation strictly to each patient's first recorded encounter, discarding over 31,000 subsequent hospitalizations, and relied exclusively on generalized linear modeling without evaluating gradient boosted ensembles or deep neural representations. Furthermore, Rubin (2015) [8] reviewed clinical readmission etiologies in diabetic populations, showing that prior acute utilization, insulin complexity, comorbidity burden, and discharge coordination are dominant risk determinants, while emphasizing that in-hospital deaths must be systematically excluded from readmission models.
+### C. Inductive Bias in Tabular Data: Trees vs. Neural Networks
+Grinsztajn, Oyallon, and Varoquaux (NeurIPS 2022) [11] benchmarked tree-based models (LightGBM, XGBoost) against deep architectures across 45 tabular datasets, showing tree models consistently outperform neural networks on tabular data. They identified three key structural mechanisms:
+1. **Coordinate Hyperplanes vs. Rotational Invariance**: Tabular features possess distinct semantic meanings. Decision trees partition space along coordinate axes using orthogonal splits, preserving feature boundaries. Neural networks compute linear combinations ($\mathbf{W}\mathbf{x} + \mathbf{b}$), exhibiting rotational invariance, which is counterproductive when rotating independent clinical features.
+2. **Target Function Discontinuity**: Clinical decision rules involve step-function thresholds (e.g., prior emergency visits $> 2$). Neural networks with smooth activations struggle to fit non-smooth target functions, whereas trees model step functions natively.
+3. **Categorical Sparsity**: One-hot encodings create high-dimensional sparse binary vectors. Modern gradient boosted trees like LightGBM (Ke et al., 2017 [6]) leverage Gradient-Based One-Side Sampling (GOSS) and Exclusive Feature Bundling (EFB) to navigate sparse categorical spaces with exceptional speed and numerical stability.
 
-### C. Deep Learning in Electronic Health Records
-Deep learning has achieved substantial success in medical imaging and clinical natural language processing. In a comprehensive survey, Shickel, Tighe, Bihorac, and Rashidi (2018) [3] synthesized advances in deep learning applied to electronic health records, demonstrating that feedforward multilayer perceptrons (MLPs), recurrent neural networks (RNNs/LSTMs), and autoencoders can automatically capture complex feature interactions without manual feature engineering.
+### D. Leakage Prevention & Cost-Sensitive Evaluation
+Kaufman, Rosset, Perlich, and Stitelman (2012) [7] formulated data leakage into feature leakage (using post-event predictors) and entity/group leakage (contaminating train and test sets with the same patient). When chronic patients are randomly split across partitions, models memorize patient signatures rather than clinical risk patterns. Patient-grouped partitioning resolves this failure mode.
 
-In a landmark multi-center study, Rajkomar et al. (Google Health, 2018) [4] applied deep learning across massive raw electronic health record systems encompassing over 216,000 hospitalizations, achieving strong 30-day readmission discrimination (ROC-AUC 0.75–0.76). However, Rajkomar et al.'s framework required access to complete temporal sequences of millions of raw clinical tokens, including high-frequency vital signs, nursing notes, and granular pharmacy orders. In secondary care environments and standard tabular repositories, practitioners only have access to cross-sectional summaries of encounter attributes. Whether deep architectures maintain an advantage over specialized tabular algorithms under such cross-sectional constraints remains a central practical question.
-
-### D. Inductive Bias in Tabular Data: Trees vs. Neural Networks
-A pivotal theoretical foundation for this study is provided by the empirical investigation of Grinsztajn, Oyallon, and Varoquaux (NeurIPS 2022) [11], titled *"Why do tree-based models still outperform deep learning on typical tabular data?"*. Grinsztajn et al. benchmarked tree-based models (LightGBM, XGBoost, CatBoost) against deep architectures across 45 tabular datasets, showing tree models consistently outperform neural networks on tabular data.
-
-Grinsztajn et al. identified three key mechanisms:
-1. **Coordinate Hyperplanes vs. Rotational Invariance**: Tabular features possess distinct semantic meanings and lack spatial invariance. Decision trees partition space along coordinate axes using orthogonal cuts, natively preserving feature boundaries. Neural networks compute linear combinations ($\mathbf{W}\mathbf{x} + \mathbf{b}$), exhibiting rotational invariance, which is unhelpful when features represent independent clinical measurements.
-2. **Target Function Discontinuity**: Clinical decision rules frequently involve step-function thresholds (e.g., prior emergency visits $> 2$). Neural networks with smooth activations struggle to fit non-smooth target functions without overfitting, whereas tree ensembles model step functions naturally.
-3. **Categorical Sparsity**: One-hot encodings create high-dimensional sparse binary vectors. Neural networks require extensive regularization to avoid poor local minima. Modern gradient boosted trees like LightGBM (Ke et al., 2017 [6]) utilize Gradient-Based One-Side Sampling (GOSS) and Exclusive Feature Bundling (EFB) to handle sparse categorical spaces efficiently.
-
-### E. Data Leakage Taxonomy & Class Imbalance
-Avoiding data leakage is essential for valid clinical inference. Kaufman, Rosset, Perlich, and Stitelman (2012) [7] formalized data leakage into feature leakage (using post-event predictors) and entity/group leakage (contaminating train and test sets with the same subject). When chronic patients are randomly split across partitions, models memorize patient-specific signatures rather than generalizable risk factors. Enforcing patient-grouped splitting resolves this failure mode.
-
-Furthermore, Saito and Rehmsmeier (2015) [5] demonstrated that ROC curves exhibit false optimism under class imbalance because large numbers of true negatives suppress the False Positive Rate. Precision-Recall curves (PR-AUC) focus strictly on minority-class precision and recall, providing an uninflated assessment of clinical triage performance. He and Garcia (2009) [9] established the theoretical foundation for cost-sensitive loss weighting to penalize high-cost false negatives. Finally, Lundberg and Lee (2017) [10] emphasized feature attribution (TreeSHAP) for clinical auditability.
+Furthermore, Saito and Rehmsmeier (2015) [5] demonstrated that ROC curves exhibit false optimism under class imbalance because large true negative volumes suppress the False Positive Rate. Precision-Recall curves (PR-AUC) focus strictly on minority-class precision and recall, providing an uninflated assessment of clinical triage performance. He and Garcia (2009) [9] established the mathematical foundation for cost-sensitive learning to penalize high-cost false negatives. Finally, Lundberg and Lee (2017) [10] emphasized feature attribution (TreeSHAP) for clinical auditability.
 
 ---
 
@@ -156,16 +137,16 @@ All models were trained on the 70,055 training encounters and evaluated across t
 | **EXP-DL-03** | Deep Learning | Wide MLP (128-32, $\eta=5 \times 10^{-4}$) | 0.6816 | 0.2497 | 0.0158 | 0.9992 | 0.7179 | 0.0309 | 0.8835 | 0.0980 | 26.09 s |
 | **EXP-DL-04** | Deep Learning | **Cost-Sensitive Deep MLP ($w=7.86$)** | **0.6842** | **0.2513** | **0.5551** | 0.6962 | 0.1958 | **0.2895** | 0.6796 | 0.1986 | 48.24 s |
 
-### B. Empirical Analysis of the Accuracy Paradox Under Class Imbalance
-The empirical results in Table I demonstrate the **Accuracy Paradox** in clinical classification:
+### B. Analysis of the Accuracy Paradox Under Class Imbalance
+The empirical results demonstrate the **Accuracy Paradox** in clinical classification:
 - Unweighted models (EXP-ML-01, EXP-ML-04, EXP-DL-01, EXP-DL-02, EXP-DL-03) achieve high accuracy (88.33%–88.35%), but this reflects majority-class collapse: the dummy baseline (EXP-ML-00) achieves 88.24% accuracy by predicting negative for all encounters. Clinical recall collapses to 1.24%–2.37%. In EXP-DL-02, out of 1,771 true readmissions, the model detects only 22 cases.
 - Conversely, introducing cost-sensitive loss weighting ($w \approx 7.8$) in EXP-ML-05 (LightGBM) and EXP-DL-04 (Cost-Sensitive Deep MLP) penalizes false negatives appropriately. While accuracy shifts to ~67.4%, clinical sensitivity surges to **56.75% for LightGBM** and **55.51% for the Deep MLP**. In clinical triage, capturing over half of readmissions at a controlled false alarm rate is the only viable operating strategy.
 
 ### C. Deep Learning Training Trajectories & Learning Curves
 Training curves (`results/figures/exp-dl-01_learning_curves.png` to `exp-dl-04_learning_curves.png`) demonstrate the impact of regularization:
-- In EXP-DL-01, training loss decreased from 0.355 to 0.330 over 12 epochs, while validation loss reached a minimum (0.3472) at epoch 7 and began oscillating upward, triggering early stopping at epoch 12.
+- In EXP-DL-01, training loss decreased from 0.355 to 0.330 over 12 epochs, while validation loss reached a minimum (0.3472) at epoch 7, triggering early stopping at epoch 12.
 - In EXP-DL-02, Batch Normalization and $L_2$ weight decay bounded generalization error, stabilizing validation ROC-AUC at 0.6804.
-- In EXP-DL-04, weighted cross-entropy loss declined from 1.05 to 0.98. Validation ROC-AUC peaked at 0.6842 at epoch 8 before `ReduceLROnPlateau` lowered the learning rate to $5 \times 10^{-4}$.
+- In EXP-DL-04, weighted cross-entropy loss declined from 1.05 to 0.98, peaking at 0.6842 validation ROC-AUC before `ReduceLROnPlateau` lowered the learning rate.
 
 ### D. Final Evaluation on Untouched Held-Out Test Set
 The best traditional model (**EXP-ML-05: Cost-Sensitive LightGBM**) and best deep model (**EXP-DL-04: Cost-Sensitive Deep MLP**) were evaluated once on the untouched test partition ($N = 15,000$ encounters, $10,566$ independent patients). Definitive test metrics are recorded in Table II.
@@ -245,27 +226,27 @@ Future work will explore:
 
 ## VII. References (IEEE Format)
 
-[1] B. Strack, J. P. DeShazo, C. Gennings, J. L. Olmo, S. Ventura, K. J. Cios, and J. N. Clore, "Impact of HbA1c measurement on hospital readmission rates: analysis of 70,000 clinical database records," *BioMed Res. Int.*, vol. 2014, Art. no. 781670, pp. 1–11, 2014. DOI: 10.1155/2014/781670.
+[1] B. Strack et al., "Impact of HbA1c measurement on hospital readmission rates: analysis of 70,000 clinical database records," *BioMed Res. Int.*, vol. 2014, Art. 781670, 2014. DOI: 10.1155/2014/781670.
 
-[2] D. Kansagara, H. Englander, A. Salanitro, D. Kagen, C. Theobald, M. Freeman, and S. Saha, "Risk prediction models for hospital readmission: a systematic review," *JAMA*, vol. 306, no. 15, pp. 1688–1698, Oct. 2011. DOI: 10.1001/jama.2011.1515.
+[2] D. Kansagara et al., "Risk prediction models for hospital readmission: a systematic review," *JAMA*, vol. 306, no. 15, pp. 1688–1698, 2011. DOI: 10.1001/jama.2011.1515.
 
-[3] B. Shickel, P. J. Tighe, A. Bihorac, and P. Rashidi, "Deep EHR: a survey of recent advances in deep learning techniques for electronic health record (EHR) analysis," *IEEE J. Biomed. Health Inform.*, vol. 22, no. 5, pp. 1589–1604, Sept. 2018. DOI: 10.1109/JBHI.2017.2767063.
+[3] B. Shickel et al., "Deep EHR: a survey of recent advances in deep learning techniques for electronic health record (EHR) analysis," *IEEE JBHI*, vol. 22, no. 5, pp. 1589–1604, 2018. DOI: 10.1109/JBHI.2017.2767063.
 
-[4] A. Rajkomar *et al.*, "Scalable and accurate deep learning for electronic health records," *npj Digit. Med.*, vol. 1, no. 1, Art. no. 18, pp. 1–10, May 2018. DOI: 10.1038/s41746-018-0029-1.
+[4] A. Rajkomar et al., "Scalable and accurate deep learning for electronic health records," *npj Digit. Med.*, vol. 1, no. 1, Art. 18, 2018. DOI: 10.1038/s41746-018-0029-1.
 
-[5] T. Saito and M. Rehmsmeier, "The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets," *PLOS ONE*, vol. 10, no. 3, Art. no. e0118432, pp. 1–21, Mar. 2015. DOI: 10.1371/journal.pone.0118432.
+[5] T. Saito and M. Rehmsmeier, "The precision-recall plot is more informative than the ROC plot when evaluating binary classifiers on imbalanced datasets," *PLOS ONE*, vol. 10, no. 3, Art. e0118432, 2015. DOI: 10.1371/journal.pone.0118432.
 
-[6] G. Ke, Q. Meng, T. Finley, T. Wang, W. Chen, W. Ma, Q. Ye, and T.-Y. Liu, "LightGBM: A highly efficient gradient boosting decision tree," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, vol. 30, pp. 3146–3154, Dec. 2017.
+[6] G. Ke et al., "LightGBM: A highly efficient gradient boosting decision tree," in *Proc. NeurIPS*, vol. 30, pp. 3146–3154, 2017.
 
-[7] S. Kaufman, S. Rosset, C. Perlich, and O. Stitelman, "Leakage in data mining: Formulation, detection, and avoidance," *ACM Trans. Knowl. Discov. Data*, vol. 6, no. 4, Art. no. 15, pp. 1–21, Dec. 2012. DOI: 10.1145/2382577.2382579.
+[7] S. Kaufman et al., "Leakage in data mining: Formulation, detection, and avoidance," *ACM TKDD*, vol. 6, no. 4, Art. 15, 2012. DOI: 10.1145/2382577.2382579.
 
-[8] D. J. Rubin, "Hospital readmission of patients with diabetes," *Curr. Diab. Rep.*, vol. 15, no. 4, Art. no. 17, pp. 1–9, Apr. 2015. DOI: 10.1007/s11892-015-0584-7.
+[8] D. J. Rubin, "Hospital readmission of patients with diabetes," *Curr. Diab. Rep.*, vol. 15, no. 4, Art. 17, 2015. DOI: 10.1007/s11892-015-0584-7.
 
-[9] H. He and E. A. Garcia, "Learning from imbalanced data," *IEEE Trans. Knowl. Data Eng.*, vol. 21, no. 9, pp. 1263–1284, Sept. 2009. DOI: 10.1109/TKDE.2008.239.
+[9] H. He and E. A. Garcia, "Learning from imbalanced data," *IEEE TKDE*, vol. 21, no. 9, pp. 1263–1284, 2009. DOI: 10.1109/TKDE.2008.239.
 
-[10] S. M. Lundberg and S.-I. Lee, "A unified approach to interpreting model predictions," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, vol. 30, pp. 4765–4774, Dec. 2017.
+[10] S. M. Lundberg and S.-I. Lee, "A unified approach to interpreting model predictions," in *Proc. NeurIPS*, vol. 30, pp. 4765–4774, 2017.
 
-[11] L. Grinsztajn, E. Oyallon, and G. Varoquaux, "Why do tree-based models still outperform deep learning on typical tabular data?," in *Proc. Adv. Neural Inf. Process. Syst. (NeurIPS)*, vol. 35, pp. 507–520, Dec. 2022.
+[11] L. Grinsztajn, E. Oyallon, and G. Varoquaux, "Why do tree-based models still outperform deep learning on typical tabular data?," in *Proc. NeurIPS*, vol. 35, pp. 507–520, 2022.
 
 ---
 
